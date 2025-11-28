@@ -529,17 +529,17 @@ $is_data_empty = empty($data_kontrol);
                                         // Tentukan class badge berdasarkan status kontrol
                                         $badge_class = 'badge-secondary';
                                         switch ($status_kontrol) {
-                                            case 'Terjadwal':
+                                            case 'Dijadwalkan':
                                                 $badge_class = 'badge-terjadwal';
                                                 break;
-                                            case 'Selesai':
+                                            case 'Hadir':
                                                 $badge_class = 'badge-selesai';
+                                                break;
+                                            case 'Tidak hadir':
+                                                $badge_class = 'badge-tunda';
                                                 break;
                                             case 'Batal':
                                                 $badge_class = 'badge-batal';
-                                                break;
-                                            case 'Tunda':
-                                                $badge_class = 'badge-tunda';
                                                 break;
                                         }
                                 ?>
@@ -800,10 +800,10 @@ $is_data_empty = empty($data_kontrol);
                                 <div class="mb-3">
                                     <label for="status_kontrol" class="form-label">Status Kontrol</label>
                                     <select class="form-select" id="status_kontrol" name="status_kontrol">
-                                        <option value="Terjadwal" selected>Terjadwal</option>
-                                        <option value="Selesai">Selesai</option>
+                                        <option value="Dijadwalkan" selected>Dijadwalkan</option>
+                                        <option value="Hadir">Hadir</option>
+                                        <option value="Tidak hadir">Tidak hadir</option>
                                         <option value="Batal">Batal</option>
-                                        <option value="Tunda">Tunda</option>
                                     </select>
                                 </div>
                             </div>
@@ -923,10 +923,10 @@ $is_data_empty = empty($data_kontrol);
                                 <div class="mb-3">
                                     <label for="edit_status_kontrol" class="form-label">Status Kontrol</label>
                                     <select class="form-select" id="edit_status_kontrol" name="status_kontrol">
-                                        <option value="Terjadwal">Terjadwal</option>
-                                        <option value="Selesai">Selesai</option>
+                                        <option value="Dijadwalkan">Dijadwalkan</option>
+                                        <option value="Hadir">Hadir</option>
+                                        <option value="Tidak hadir">Tidak hadir</option>
                                         <option value="Batal">Batal</option>
-                                        <option value="Tunda">Tunda</option>
                                     </select>
                                 </div>
                             </div>

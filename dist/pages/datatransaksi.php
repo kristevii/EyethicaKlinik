@@ -303,6 +303,7 @@ $is_data_empty = empty($data_transaksi);
 /* Tombol hapus dan edit */
 .btn-hapus, .btn-edit {
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .btn-hapus:hover {
@@ -313,6 +314,13 @@ $is_data_empty = empty($data_transaksi);
 .btn-edit:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Pastikan tombol group dapat diklik */
+.btn-group .btn {
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
 }
 
 /* Loading spinner */
@@ -1058,24 +1066,6 @@ $is_data_empty = empty($data_transaksi);
         window.location.href = 'datatransaksi.php?entries=' + entries + '&sort=' + sort;
     }
 
-    // Function untuk menutup modal tambah transaksi
-    function closeTambahTransaksiModal() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('tambahTransaksiModal'));
-        modal.hide();
-    }
-
-    // Function untuk menutup modal edit transaksi
-    function closeEditTransaksiModal() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editTransaksiModal'));
-        modal.hide();
-    }
-
-    // Function untuk menutup modal hapus transaksi
-    function closeHapusModal() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('hapusModal'));
-        modal.hide();
-    }
-
     // Function untuk menampilkan modal hapus
     function showHapusModal(id) {
         document.getElementById('idTransaksiHapus').textContent = 'ID ' + id;
@@ -1088,19 +1078,21 @@ $is_data_empty = empty($data_transaksi);
 
     // Function untuk menampilkan modal edit
     function showEditModal(id, rekam, kontrol, pasien, staff, tanggal_transaksi, metode_pembayaran, total_biaya, status_pembayaran) {
+        console.log('Data yang diterima:', {id, rekam, kontrol, pasien, staff, tanggal_transaksi, metode_pembayaran, total_biaya, status_pembayaran});
+        
         // Isi form dengan data yang ada
         document.getElementById('edit_id_transaksi').value = id;
-        document.getElementById('edit_id_rekam').value = rekam;
-        document.getElementById('edit_id_kontrol').value = kontrol;
-        document.getElementById('edit_id_pasien').value = pasien;
-        document.getElementById('edit_kode_staff').value = staff;
-        document.getElementById('edit_tanggal_transaksi').value = tanggal_transaksi;
-        document.getElementById('edit_metode_pembayaran').value = metode_pembayaran;
-        document.getElementById('edit_total_biaya').value = total_biaya;
-        document.getElementById('edit_status_pembayaran').value = status_pembayaran;
+        document.getElementById('edit_id_rekam').value = rekam || '';
+        document.getElementById('edit_id_kontrol').value = kontrol || '';
+        document.getElementById('edit_id_pasien').value = pasien || '';
+        document.getElementById('edit_kode_staff').value = staff || '';
+        document.getElementById('edit_tanggal_transaksi').value = tanggal_transaksi || '';
+        document.getElementById('edit_metode_pembayaran').value = metode_pembayaran || '';
+        document.getElementById('edit_total_biaya').value = total_biaya || '';
+        document.getElementById('edit_status_pembayaran').value = status_pembayaran || 'Belum bayar';
         
-        // Tampilkan modal dengan membuat instance baru
-        const editModal = new bootstrap.Modal.getInstance(document.getElementById('editTransaksiModal')) || new bootstrap.Modal(document.getElementById('editTransaksiModal'));
+        // Tampilkan modal
+        const editModal = new bootstrap.Modal(document.getElementById('editTransaksiModal'));
         editModal.show();
     }
 
@@ -1121,32 +1113,46 @@ $is_data_empty = empty($data_transaksi);
         }, 500);
     }
 
-    // Setup modal dengan event delegation
+    // Setup modal dengan event delegation yang lebih robust
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, setting up event listeners...');
+
         // Event delegation untuk tombol hapus
         document.addEventListener('click', function(e) {
             if (e.target.closest('.btn-hapus')) {
                 e.preventDefault();
                 const button = e.target.closest('.btn-hapus');
                 const id = button.getAttribute('data-id');
+                console.log('Tombol hapus diklik:', id);
                 showHapusModal(id);
             }
         });
 
-        // Event delegation untuk tombol edit
+        // Event delegation untuk tombol edit - VERSI PERBAIKAN
         document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-edit')) {
+            const editButton = e.target.closest('.btn-edit');
+            if (editButton) {
                 e.preventDefault();
-                const button = e.target.closest('.btn-edit');
-                const id = button.getAttribute('data-id');
-                const rekam = button.getAttribute('data-rekam');
-                const kontrol = button.getAttribute('data-kontrol');
-                const pasien = button.getAttribute('data-pasien');
-                const staff = button.getAttribute('data-staff');
-                const tanggal_transaksi = button.getAttribute('data-tanggal_transaksi');
-                const metode_pembayaran = button.getAttribute('data-metode_pembayaran');
-                const total_biaya = button.getAttribute('data-total_biaya');
-                const status_pembayaran = button.getAttribute('data-status_pembayaran');
+                e.stopPropagation();
+                
+                console.log('Tombol edit diklik');
+                
+                // Ambil semua data atribut
+                const id = editButton.getAttribute('data-id');
+                const rekam = editButton.getAttribute('data-rekam');
+                const kontrol = editButton.getAttribute('data-kontrol');
+                const pasien = editButton.getAttribute('data-pasien');
+                const staff = editButton.getAttribute('data-staff');
+                const tanggal_transaksi = editButton.getAttribute('data-tanggal_transaksi');
+                const metode_pembayaran = editButton.getAttribute('data-metode_pembayaran');
+                const total_biaya = editButton.getAttribute('data-total_biaya');
+                const status_pembayaran = editButton.getAttribute('data-status_pembayaran');
+                
+                console.log('Data atribut:', {
+                    id, rekam, kontrol, pasien, staff, 
+                    tanggal_transaksi, metode_pembayaran, total_biaya, status_pembayaran
+                });
+                
                 showEditModal(id, rekam, kontrol, pasien, staff, tanggal_transaksi, metode_pembayaran, total_biaya, status_pembayaran);
             }
         });
@@ -1167,6 +1173,15 @@ $is_data_empty = empty($data_transaksi);
             });
         }
 
+        // Debug: Cek apakah tombol edit ada di DOM
+        const editButtons = document.querySelectorAll('.btn-edit');
+        console.log('Jumlah tombol edit ditemukan:', editButtons.length);
+        
+        editButtons.forEach((btn, index) => {
+            console.log(`Tombol edit ${index + 1}:`, btn);
+            console.log(`Data ID: ${btn.getAttribute('data-id')}`);
+        });
+
         // Auto focus pada input search
         const searchInput = document.querySelector('input[name="search"]');
         if (searchInput && '<?= $search_query ?>') {
@@ -1181,8 +1196,10 @@ $is_data_empty = empty($data_transaksi);
                 document.getElementById('tambahTransaksiForm').reset();
                 document.getElementById('tanggal_transaksi').value = '<?= date('Y-m-d') ?>';
                 const submitButton = document.getElementById('btnTambahTransaksi');
-                submitButton.innerHTML = '<i class="fas fa-save me-1"></i>Simpan Transaksi';
-                submitButton.disabled = false;
+                if (submitButton) {
+                    submitButton.innerHTML = '<i class="fas fa-save me-1"></i>Simpan Transaksi';
+                    submitButton.disabled = false;
+                }
             });
         }
 
@@ -1190,23 +1207,12 @@ $is_data_empty = empty($data_transaksi);
         if (editTransaksiModal) {
             editTransaksiModal.addEventListener('hidden.bs.modal', function () {
                 const submitButton = document.getElementById('btnUpdateTransaksi');
-                submitButton.innerHTML = '<i class="fas fa-save me-1"></i>Update Transaksi';
-                submitButton.disabled = false;
+                if (submitButton) {
+                    submitButton.innerHTML = '<i class="fas fa-save me-1"></i>Update Transaksi';
+                    submitButton.disabled = false;
+                }
             });
         }
-
-        // Event listener untuk tombol close manual
-        document.querySelectorAll('#tambahTransaksiModal .btn-close, #tambahTransaksiModal .btn-secondary').forEach(btn => {
-            btn.addEventListener('click', closeTambahTransaksiModal);
-        });
-        
-        document.querySelectorAll('#editTransaksiModal .btn-close, #editTransaksiModal .btn-secondary').forEach(btn => {
-            btn.addEventListener('click', closeEditTransaksiModal);
-        });
-        
-        document.querySelectorAll('#hapusModal .btn-close, #hapusModal .btn-secondary').forEach(btn => {
-            btn.addEventListener('click', closeHapusModal);
-        });
     });
     </script>
     
